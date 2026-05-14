@@ -1,0 +1,138 @@
+=====================
+// 🛡️ BACKEND & SECURITY (Node.js)
+// ==========================================
+require('dotenv').config();
+const express = require('express');
+const fetch = require('node-fetch');
+
+const app = express();
+app.use(express.json());
+
+// Security: API Key environment variable se hi load hogi
+const API_KEY = process.env.GEMINI_API_KEY;
+
+app.post('/api/chat', async (req, res) => {
+    try {
+        if (!API_KEY) return res.status(500).json({ error: "System Error: API Key missing." });
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: req.body.contents })
+        });
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: "Neural Link Offline" });
+    }
+});
+
+// ==========================================
+// 🎨 FRONTEND (Professional UI & SEO)
+// ==========================================
+app.get('/', (req, res) => {
+    res.send(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gold AI Elite | Professional Business Suite</title>
+    <meta name="description" content="Secure & Professional AI Assistant. Experience elite productivity with encrypted neural processing.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --accent: #c8842a; --bg: #fcfcfb; }
+        .dark { --bg: #0b0b0a; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); transition: 0.3s; overflow: hidden; }
+        .chat-bubble { padding: 1.2rem; border-radius: 22px; max-width: 80%; font-size: 0.95rem; line-height: 1.6; }
+        .ai { background: #f1f0ee; border-bottom-left-radius: 4px; }
+        .dark .ai { background: #1e1e1d; color: #eee; }
+        .user { background: var(--accent); color: white; border-bottom-right-radius: 4px; align-self: flex-end; box-shadow: 0 10px 20px rgba(200, 132, 42, 0.3); }
+        .glass { backdrop-filter: blur(15px); background: rgba(255,255,255,0.8); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .dark .glass { background: rgba(11,11,10,0.85); border-bottom: 1px solid rgba(255,255,255,0.05); }
+    </style>
+</head>
+<body class="light">
+    <div id="auth" class="fixed inset-0 z-[100] flex items-center justify-center bg-white dark:bg-black p-8">
+        <div class="w-full max-w-sm text-center">
+            <div class="w-20 h-20 bg-accent rounded-[2.5rem] mx-auto mb-8 shadow-2xl flex items-center justify-center text-white text-3xl font-bold">G</div>
+            <h1 class="text-3xl font-bold mb-2 dark:text-white">Neural Access</h1>
+            <input type="password" id="pin" class="w-full p-5 rounded-2xl bg-gray-50 dark:bg-zinc-900 border-none text-center outline-none focus:ring-2 ring-accent mb-4" placeholder="Security PIN (12345)">
+            <button onclick="login()" class="w-full p-5 bg-accent text-white rounded-2xl font-bold">Authenticate</button>
+        </div>
+    </div>
+
+    <div id="app" class="hidden flex h-screen">
+        <aside class="w-72 bg-white dark:bg-zinc-900 border-r dark:border-zinc-800 p-8 flex flex-col">
+            <div class="font-bold text-xl mb-12 flex items-center gap-3"><span class="w-2 h-8 bg-accent rounded-full"></span>GOLD ELITE</div>
+            <nav class="flex-1"><button onclick="window.location.reload()" class="w-full p-4 bg-accent/10 text-accent rounded-xl font-bold text-sm">＋ New Session</button></nav>
+            <div class="pt-6 border-t dark:border-zinc-800 text-[10px] text-gray-400 font-bold tracking-widest">
+                © 2026 ELITE PRO SYSTEM
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col dark:bg-[#0b0b0a]">
+            <header class="h-20 glass flex items-center justify-between px-10">
+                <div class="text-[10px] font-bold text-green-500 tracking-[0.3em] uppercase animate-pulse">Neural Link Active</div>
+                <button onclick="document.body.classList.toggle('dark')" class="p-3 bg-gray-100 dark:bg-zinc-800 rounded-xl transition">🌓</button>
+            </header>
+            <div id="box" class="flex-1 overflow-y-auto p-10 flex flex-col space-y-8"></div>
+            <div class="p-8">
+                <div class="max-w-4xl mx-auto bg-white dark:bg-zinc-900 rounded-[2.5rem] shadow-2xl p-2 flex gap-2 border dark:border-zinc-800">
+                    <input type="text" id="query" class="flex-1 px-6 bg-transparent outline-none dark:text-white" placeholder="Execute command...">
+                    <button onclick="run()" class="bg-accent text-white px-10 py-4 rounded-[2rem] font-bold hover:scale-105 transition">EXECUTE</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let history = [];
+        function login() {
+            if(document.getElementById('pin').value === '12345') {
+                document.getElementById('auth').style.display = 'none';
+                document.getElementById('app').classList.remove('hidden');
+            }
+        }
+        async function run() {
+            const input = document.getElementById('query');
+            const val = input.value.trim();
+            if(!val) return;
+            const box = document.getElementById('box');
+            box.innerHTML += \`<div class="chat-bubble user">\${val}</div>\`;
+            input.value = '';
+            const aiDiv = document.createElement('div');
+            aiDiv.className = 'chat-bubble ai opacity-50';
+            aiDiv.innerHTML = "Processing...";
+            box.appendChild(aiDiv);
+            box.scrollTop = box.scrollHeight;
+            history.push({ role: "user", parts: [{ text: val }] });
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: history })
+                });
+                const data = await res.json();
+                const msg = data.candidates[0].content.parts[0].text;
+                history.push({ role: "model", parts: [{ text: msg }] });
+                aiDiv.classList.remove('opacity-50');
+                aiDiv.innerHTML = marked.parse(msg);
+                aiDiv.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+                box.scrollTop = box.scrollHeight;
+            } catch (e) {
+                aiDiv.innerHTML = "🔴 Neural Connection Reset.";
+            }
+        }
+    </script>
+</body>
+</html>
+    `);
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("System Online"));
